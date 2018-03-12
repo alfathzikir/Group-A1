@@ -4,21 +4,34 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
  
 public class Assign1 {
 	
+	static int declarations = 0;
+	static int references = 0;
+	
+	static String type;
+	
+	
 	public static void main(String[] args) throws IOException {
 		String directory = args[0];
-		String type = args[1];
+		type = args[1];
+		
 		
 		System.out.println(directory);
 		parseFilesInDir(directory);
+		
+		System.out.println("Declarations: " + declarations + " References: " + references);
 	}
 	
 	public static void parse(String str){
@@ -34,21 +47,54 @@ public class Assign1 {
 		cu.accept(new ASTVisitor() {
  
 			Set names = new HashSet();
- 
-			public boolean visit(VariableDeclarationFragment node) {
+			
+			public boolean visit(FieldDeclaration node) {
+				Type t = node.getType();
+				System.out.println(t);
+				return true;
+			}
+			
+			public boolean visit(TypeDeclaration node) {
 				SimpleName name = node.getName();
 				this.names.add(name.getIdentifier());
-				System.out.println("Declaration of '"+name+"' at line"+cu.getLineNumber(name.getStartPosition()));
-				return false; // do not continue to avoid usage info
-			}
- 
-			public boolean visit(SimpleName node) {
-				if (this.names.contains(node.getIdentifier())) {
-				System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
+				System.out.println(name);
+				if (type == name.toString()) {
+					declarations++;
 				}
 				return true;
 			}
- 
+			
+			public boolean visit(VariableDeclarationStatement node) {
+				Type t = node.getType();
+				System.out.println(t);
+				return true;
+			}
+				
+//			public boolean visit(ClassInstanceCreation node) {
+//				Type t = node.getType();
+//				System.out.println(t);
+//				return false;
+//			}
+			
+//			public boolean visit(SimpleName node) {
+//				int t = node.getNodeType();
+//				System.out.println(t);
+//				return false;	
+//			}
+			
+//			public boolean visit(VariableDeclarationFragment node) {
+//				SimpleName name = node.getName();
+//				this.names.add(name.getIdentifier());
+//				System.out.println(name);
+//				return false; // do not continue to avoid usage info
+//			}
+			
+//			public boolean visit(SimpleName node) {
+//				if (this.names.contains(node.getIdentifier())) {
+//				System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
+//				}
+//				return true;
+//			}
 		});
 	}
 	

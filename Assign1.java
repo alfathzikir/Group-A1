@@ -17,56 +17,51 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
  
 public class Assign1 {
 	
+	static String type;
 	static int declarations = 0;
 	static int references = 0;
-	
-	static String type;
-	
-	
+			
 	public static void main(String[] args) throws IOException {
 		String directory = args[0];
 		type = args[1];
 		
-		
-		System.out.println(directory);
+		System.out.println("Directory: "+directory);
+		System.out.println("Type: "+type);
 		parseFilesInDir(directory);
 		
-		System.out.println("Declarations: " + declarations + " References: " + references);
+		System.out.println("Declarations of "+type+": "+declarations+"    References to "+type+": "+references);
 	}
 	
 	public static void parse(String str){
+		
 		ASTParser parser = ASTParser.newParser(AST.JLS9);
-		//parser.setSource("public class A { int i = 9;  \n int j; \n ArrayList<Integer> al = new ArrayList<Integer>();j=1000; }".toCharArray());
 		parser.setSource(str.toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		//ASTNode node = parser.createAST(null);
- 
- 
+		
 		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
  
 		cu.accept(new ASTVisitor() {
  
-			Set names = new HashSet();
-			
-			public boolean visit(FieldDeclaration node) {
-				Type t = node.getType();
-				System.out.println(t);
-				return true;
-			}
-			
+			//Set names = new HashSet();
+					
 			public boolean visit(TypeDeclaration node) {
 				SimpleName name = node.getName();
-				this.names.add(name.getIdentifier());
-				System.out.println(name);
-				if (type == name.toString()) {
-					declarations++;
+				System.out.println("Declaration: "+name.getIdentifier());
+				if (type.equals(name.getIdentifier())) {
+					declarations = declarations + 1;
 				}
 				return true;
 			}
 			
 			public boolean visit(VariableDeclarationStatement node) {
 				Type t = node.getType();
-				System.out.println(t);
+				System.out.println("Reference: "+t);
+				return true;
+			}
+			
+			public boolean visit(FieldDeclaration node) {
+				Type t = node.getType();
+				System.out.println("Reference: "+t);
 				return true;
 			}
 				
@@ -96,6 +91,7 @@ public class Assign1 {
 //				return true;
 //			}
 		});
+		
 	}
 	
 	public static String readFileToString(String filePath) throws IOException {
@@ -124,7 +120,7 @@ public class Assign1 {
 		 for (File f : files ) {
 			 filePath = f.getAbsolutePath();
 			 if(f.isFile()){
-				 System.out.println(filePath);
+				 System.out.println("File: "+filePath);
 				 parse(readFileToString(filePath));
 			 }
 		 }

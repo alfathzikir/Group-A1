@@ -10,6 +10,10 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -29,14 +33,16 @@ public class Assign1 {
 		System.out.println("Type: "+type);
 		parseFilesInDir(directory);
 		
-		System.out.println("Declarations of "+type+": "+declarations+"    References to "+type+": "+references);
+		System.out.println(type+". Declarations found: "+declarations+"; References found: "+references+".");
 	}
 	
 	public static void parse(String str){
 		
-		ASTParser parser = ASTParser.newParser(AST.JLS9);
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(str.toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setBindingsRecovery(true);
+		parser.setResolveBindings(true);
 		
 		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
  
@@ -45,9 +51,12 @@ public class Assign1 {
 			//Set names = new HashSet();
 					
 			public boolean visit(TypeDeclaration node) {
+				//ITypeBinding myBinding = node.resolveBinding();
+				//String qualifiedName = myBinding.getQualifiedName();
 				SimpleName name = node.getName();
-				System.out.println("Declaration: "+name.getIdentifier());
-				if (type.equals(name.getIdentifier())) {
+				String qualifiedName = name.getFullyQualifiedName();
+				System.out.println("Declaration: "+qualifiedName);
+				if (type.equals(qualifiedName)) {
 					declarations = declarations + 1;
 				}
 				return true;
@@ -55,12 +64,28 @@ public class Assign1 {
 			
 			public boolean visit(VariableDeclarationStatement node) {
 				Type t = node.getType();
+//				System.out.println(t);
+				String name = t.toString();
+				if (type.equals(name)) {
+					references = references + 1;
+				}
+//				PrimitiveType t = (PrimitiveType) node.getType();
+//				ITypeBinding myBinding = t.resolveBinding();
+//				String qualifiedName = myBinding.getQualifiedName();
 				System.out.println("Reference: "+t);
 				return true;
 			}
 			
 			public boolean visit(FieldDeclaration node) {
 				Type t = node.getType();
+//				System.out.println(t);
+				String name = t.toString();
+				if (type.equals(name)) {
+					references = references + 1;
+				}
+//				PrimitiveType t = (PrimitiveType) node.getType();
+//				ITypeBinding myBinding = t.resolveBinding();
+//				String qualifiedName = myBinding.getQualifiedName();
 				System.out.println("Reference: "+t);
 				return true;
 			}

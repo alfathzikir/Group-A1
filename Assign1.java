@@ -2,24 +2,20 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.Map;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NameQualifiedType;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
  
-public class Assign1 {
+public class Test {
 	
 	static String type;
 	static int declarations = 0;
@@ -44,17 +40,42 @@ public class Assign1 {
 		parser.setBindingsRecovery(true);
 		parser.setResolveBindings(true);
 		
+		Map options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+		parser.setCompilerOptions(options);
+		
+		//String[] sources = { "C:\\Users\\Hamzah\\Desktop\\NewFolder"};
+		//String[] classpath = { 
+		parser.setEnvironment(null, null, null, true);
+		
+		String unitName = "Main.java";
+		parser.setUnitName(unitName);
+		
 		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
  
 		cu.accept(new ASTVisitor() {
  
-			//Set names = new HashSet();
+			//Set names = new HashSet()
 					
 			public boolean visit(TypeDeclaration node) {
-				//ITypeBinding myBinding = node.resolveBinding();
-				//String qualifiedName = myBinding.getQualifiedName();
-				SimpleName name = node.getName();
-				String qualifiedName = name.getFullyQualifiedName();
+				ITypeBinding myBinding = node.resolveBinding();
+				String qualifiedName = myBinding.getQualifiedName();
+//				SimpleName name = node.getName();
+//				String qualifiedName = name.getFullyQualifiedName();
+				System.out.println("Declaration: "+qualifiedName);
+				if (type.equals(qualifiedName)) {
+					declarations = declarations + 1;
+				}
+				return true;
+			}
+			
+			public boolean visit(EnumDeclaration node) {
+				ITypeBinding myBinding = node.resolveBinding();
+				String qualifiedName = myBinding.getQualifiedName();
+//				SimpleName name = node.getName();
+//				String qualifiedName = name.getFullyQualifiedName();
 				System.out.println("Declaration: "+qualifiedName);
 				if (type.equals(qualifiedName)) {
 					declarations = declarations + 1;
@@ -65,28 +86,36 @@ public class Assign1 {
 			public boolean visit(VariableDeclarationStatement node) {
 				Type t = node.getType();
 //				System.out.println(t);
-				String name = t.toString();
-				if (type.equals(name)) {
+//				String name = t.toString();
+
+//				PrimitiveType t = (PrimitiveType) node.getType();
+				ITypeBinding myBinding = t.resolveBinding();
+				String qualifiedName = myBinding.getQualifiedName();
+//				if (t.toString().equals("String")) {
+//					name = "java.lang."+name;
+//				}
+				System.out.println("Reference: "+qualifiedName);
+				if (type.equals(qualifiedName)) {
 					references = references + 1;
 				}
-//				PrimitiveType t = (PrimitiveType) node.getType();
-//				ITypeBinding myBinding = t.resolveBinding();
-//				String qualifiedName = myBinding.getQualifiedName();
-				System.out.println("Reference: "+t);
 				return true;
 			}
 			
 			public boolean visit(FieldDeclaration node) {
 				Type t = node.getType();
 //				System.out.println(t);
-				String name = t.toString();
-				if (type.equals(name)) {
+//				String name = t.toString();
+
+//				PrimitiveType t = (PrimitiveType) node.getType();
+				ITypeBinding myBinding = t.resolveBinding();
+				String qualifiedName = myBinding.getQualifiedName();
+//				if (t.toString().equals("String")) {
+//					name = "java.lang."+name;
+//				}
+				System.out.println("Reference: "+qualifiedName);
+				if (type.equals(qualifiedName)) {
 					references = references + 1;
 				}
-//				PrimitiveType t = (PrimitiveType) node.getType();
-//				ITypeBinding myBinding = t.resolveBinding();
-//				String qualifiedName = myBinding.getQualifiedName();
-				System.out.println("Reference: "+t);
 				return true;
 			}
 				
